@@ -128,7 +128,33 @@ class TodoList
   end
 
   def find_by_title(string)
+    select { |todo| todo.title == string }.first
+  end
 
+  def all_done
+    select { |todo| todo.done? }
+  end
+
+  def all_not_done
+    select { |todo| todo.done == false }
+  end
+
+  def mark_done(string)
+
+    todos.each do |item|
+      if item.title == string
+        item.done = true
+      end
+    end
+
+  end
+
+  def mark_all_done
+    each { |todo| todo.done! }
+  end
+
+  def mark_all_undone
+    each {|todo| todo.undone! }
   end
 
   protected
@@ -145,8 +171,5 @@ list.add(todo1)
 list.add(todo2)
 list.add(todo3)
 
-todo1.done!
 
-results = list.select { |todo| todo.done? }    # you need to implement this method
 
-puts results.inspect
