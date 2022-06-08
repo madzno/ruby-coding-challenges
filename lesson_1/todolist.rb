@@ -110,11 +110,8 @@ class TodoList
   end
 
   def each
-    idx = 0
-    loop do
-      yield(@todos[idx])
-      idx += 1
-      break if idx >= @todos.size
+    @todos.each do |todo|
+      yield(todo)
     end
     self
   end
@@ -122,7 +119,7 @@ class TodoList
   def select
     results = TodoList.new('Selected todos')
     @todos.each do |item|
-      results.todos << item if yield(item)
+      results.add(item) if yield(item)
     end
     results
   end
@@ -156,10 +153,6 @@ class TodoList
   def mark_all_undone
     each {|todo| todo.undone! }
   end
-
-  protected
-
-  attr_accessor :todos
 end
 
 todo1 = Todo.new("Buy milk")
