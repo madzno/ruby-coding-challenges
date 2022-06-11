@@ -1,3 +1,7 @@
+# This class represents a todo item and its associated
+# data: name and description. There's also a "done"
+# flag to show whether this todo item is done.
+
 class Todo
   DONE_MARKER = 'X'
   UNDONE_MARKER = ' '
@@ -28,10 +32,14 @@ class Todo
 
   def ==(otherTodo)
     title == otherTodo.title &&
-    description == otherTodo.description &&
-    done == otherTodo.done
+      description == otherTodo.description &&
+      done == otherTodo.done
   end
 end
+
+# This class represents a collection of Todo objects.
+# You can perform typical collection-oriented actions
+# on a TodoList object, including iteration and selection.
 
 class TodoList
   attr_accessor :title
@@ -40,15 +48,6 @@ class TodoList
     @title = title
     @todos = []
   end
-
-  def add(todo)
-    if todo.class == Todo
-      @todos << todo
-    else
-      raise TypeError, "Can only add Todo objects"
-    end
-  end
-  alias_method :<<, :add
 
   def size
     @todos.size
@@ -62,34 +61,6 @@ class TodoList
     @todos.last
   end
 
-  def to_a
-    @todos.clone
-  end
-
-  def done?
-    @todos.all? do |item|
-      item.done == true
-    end
-  end
-
-  def item_at(idx)
-    @todos.fetch(idx)
-  end
-
-  def mark_done_at(idx)
-    @todos.fetch(idx).done = true
-  end
-
-  def mark_undone_at(idx)
-    @todos.fetch(idx).done = false
-  end
-
-  def done!
-    @todos.each do |item|
-      item.done = true
-    end
-  end
-
   def shift
     @todos.shift
   end
@@ -98,15 +69,47 @@ class TodoList
     @todos.pop
   end
 
+  def done?
+    @todos.all? { |todo| todo.done? }
+  end
+
+  def <<(todo)
+    raise TypeError, 'can only add Todo objects' unless todo.instance_of? Todo
+
+    @todos << todo
+  end
+  alias_method :add, :<<
+
+  def item_at(idx)
+    @todos.fetch(idx)
+  end
+
+  def mark_done_at(idx)
+    item_at(idx).done!
+  end
+
+  def mark_undone_at(idx)
+    item_at(idx).undone!
+  end
+
+  def done!
+    @todos.each_index do |idx|
+      mark_done_at(idx)
+    end
+  end
+
   def remove_at(idx)
-    deleted_item = @todos.fetch(idx)
-    @todos.delete(deleted_item)
+    @todos.delete(item_at(idx))
   end
 
   def to_s
     text = "---- #{title} ----\n"
     text << @todos.map(&:to_s).join("\n")
     text
+  end
+
+  def to_a
+    @todos.clone
   end
 
   def each
@@ -117,15 +120,16 @@ class TodoList
   end
 
   def select
-    results = TodoList.new('Selected todos')
-    @todos.each do |item|
-      results.add(item) if yield(item)
+    list = TodoList.new(title)
+    each do |todo|
+      list.add(todo) if yield(todo)
     end
-    results
+    list
   end
 
-  def find_by_title(string)
-    select { |todo| todo.title == string }.first
+  # returns first Todo by title, or nil if no match
+  def find_by_title(title)
+    select { |todo| todo.title == title }.first
   end
 
   def all_done
@@ -133,17 +137,11 @@ class TodoList
   end
 
   def all_not_done
-    select { |todo| todo.done == false }
+    select { |todo| !todo.done? }
   end
 
-  def mark_done(string)
-
-    todos.each do |item|
-      if item.title == string
-        item.done = true
-      end
-    end
-
+  def mark_done(title)
+    find_by_title(title) && find_by_title(title).done!
   end
 
   def mark_all_done
@@ -151,18 +149,6 @@ class TodoList
   end
 
   def mark_all_undone
-    each {|todo| todo.undone! }
+    each { |todo| todo.undone! }
   end
 end
-
-todo1 = Todo.new("Buy milk")
-todo2 = Todo.new("Clean room")
-todo3 = Todo.new("Go to gym")
-
-list = TodoList.new("Today's Todos")
-list.add(todo1)
-list.add(todo2)
-list.add(todo3)
-
-
-
