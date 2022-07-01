@@ -8,6 +8,7 @@ Constructor
 To_decimal
 - First need to check that input is a valid number
  - if string to_i is equal to 0, the input is not a valid number
+ - if the string includes the digits 8 or 9 then it is not a valid number
  - if not valid, return 0
 - rest of to_decimal pedac
 
@@ -43,7 +44,7 @@ class Octal
   end
 
   def to_decimal
-    return 0 if valid_number == 0
+    return 0 if invalid_number?
     digits = @value.to_i.digits
 
     digits.map.with_index do |num, idx|
@@ -51,10 +52,7 @@ class Octal
     end.sum
   end
 
-  def valid_number
-    @value.to_i
+  def invalid_number?
+    @value.match?(/[^0-7]/)
   end
 end
-
-p Octal.new('abc').to_decimal
-p Octal.new('2047').to_decimal
