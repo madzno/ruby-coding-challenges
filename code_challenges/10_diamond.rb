@@ -130,13 +130,17 @@ class Diamond
     start_string = first_and_last_line(diamond_width)
     return start_string if letter == 'A'
 
-    ascending_string = ascending(diamond_width)
+    ascending_string = ascending(diamond_width, letter)
+    return start_string + ascending_string + start_string if letter == 'B'
+
     descending_string = descending(diamond_width, letter)
 
     start_string + ascending_string + descending_string + start_string
   end
 
   class << self
+    private
+
     def first_and_last_line(width)
       side_spaces = width / 2
       "#{' ' * side_spaces}#{ALPHABET[0]}#{' ' * side_spaces}\n"
@@ -147,38 +151,33 @@ class Diamond
       "#{ALPHABET[index]}#{' ' * side_spaces}\n"
     end
 
-    def ascending(width)
+    def ascending(width, letter)
       ascending_strings = ''
       side_spaces = (width / 2) - 1
       middle_spaces = 1
-      index = 1
 
-      loop do
+      1.upto(ALPHABET.find_index(letter)) do |index|
         string = construct_line(side_spaces, index, middle_spaces)
         ascending_strings += string
         middle_spaces += 2
         side_spaces -= 1
-        index += 1
-        break if middle_spaces >= width
       end
+
       ascending_strings
     end
 
     def descending(width, letter)
       descending_strings = ''
-      side_spaces = 1
       middle_spaces = width - 4
       index = ALPHABET.find_index(letter) - 1
-      return descending_strings if middle_spaces <= 0
 
-      loop do
+      1.upto((width / 2) - 1) do |side_spaces|
         string = construct_line(side_spaces, index, middle_spaces)
         descending_strings += string
-        side_spaces += 1
         middle_spaces -= 2
         index -= 1
-        break if index < 1
       end
+
       descending_strings
     end
   end
