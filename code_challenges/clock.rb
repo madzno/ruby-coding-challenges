@@ -32,7 +32,7 @@ String
 Getters and Setters
 @minutes, @hours
 
-Algorithm clock#at
+Algorithm clock#at (**class method**)
 - define a method at that takes two integer arguments, the second
 argument is defaulted to 0
 
@@ -97,13 +97,70 @@ Clock.at(10) + 3061
 "10:00" + 3061
 @hours = 10
 @minutes = 0
-3061.divmod(60) = [51, 1]
-10 + 51
-
+- if # > 1440
+- divide the # by 1440
+- subtract from the number (1440 * the result of the 1440 divison)
+- divmod that result
+add first # to @hours and seocnd # to @minutes
 
 Algorithm clock#+
 - define a method + that takes one argument, an integer
--
+- If number is > 1440
+- assign local variable days to the number / 1440
+- subtract from number (1440 * days)
+- number.divmod(60) =[num_one, num_two]
+- @hours += num_one
+- @minutes += num_two
+
+- If number is >= 60
+- number.divmod(60) = [num_one, num_two]
+- @hours += num_one
+- @minutes += num_two
+
+- else
+- @minutes += num_two
+
+return the result of calling at(minutes, hours)
+
 =end
 
 
+class Clock
+  attr_accessor :hours, :minutes
+
+  def self.at(hours, minutes= 0)
+    @hours = hours
+    @minutes = minutes
+
+    hours = military_time(hours) if (13..24).include?(hours)
+    minutes = 0 if minutes == 60
+
+    hours + minutes
+  end
+
+  def ==(other_clock)
+    @hours == other_clock.hours && @minutes == other_clock.minutes
+  end
+
+  def +(number)
+    if number >= 1440
+      days = number / 1440
+      number -= (1440 * days)
+      num_one, num_two = number.divmod(60)
+    end
+
+    @hours += num_one
+    @minutes += num_two
+
+    Clock.at(@hours, @minutes)
+  end
+
+  class << self
+    def military_time(hours)
+      return 0 if hours == 24
+      hours - 12
+    end
+  end
+end
+
+p Clock.at(10)
