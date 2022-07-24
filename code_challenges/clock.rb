@@ -122,45 +122,105 @@ Algorithm clock#+
 
 return the result of calling at(minutes, hours)
 
+PEDAC clock#-
+
+Test cases
+Clock.at(0)
+@hours = 0
+@minutes = 0
+
+Subtracting 50
+Result is "23:10"
+@hours = 23 0 - 60 subtract 1 from hrs
+@minutes = 10 (60 - 50) = 10
+
+# 2
+Clock.at(10, 30) - 5
+@hours = 10
+@minutes = 30
+
+Subtracting 5
+Result is "10:25"
+@hours = 10
+@minutes = 25 (30 - 5) = 25
+
+#3
+Clock.at(10) - 90
+@hours = 10
+@minutes = 0
+
+Subtracting 90
+Result is "08:30"
+@hours = 8 (-2)
+@minutes = 30 (-30)
+
+#4
+Clock.at(0, 30) - 60
+@hours = 0
+@minutes = 30
+
+Subtracting 60
+Result is "23:30"
+@hours = 23 (-1)
+@minutes = 30 (-0)
+
+#5
+Clock.at(10) - 3061
+Result is "06:59"
+@hours = 6
+@minutes = 59
+
+Algorithm
+- define a method - that takes an integer as an argument
+- if @hours == 0, reasign it to 24
+- if @minutes == 0, reasign it to 60
+
+- if integer is < 60 && hours != 24
+    @minutes -= integer
+- if integer is < 60 && hours == 24
+    @hours = 23
+    @mionutes -= integer
+- if integer is (60...1440)
+
 =end
 
 
 class Clock
   attr_accessor :hours, :minutes
 
-  def self.at(hours, minutes= 0)
+  ONE_DAY = 24 * 60
+
+  def initialize(hours, minutes)
     @hours = hours
     @minutes = minutes
+  end
 
-    hours = military_time(hours) if (13..24).include?(hours)
-    minutes = 0 if minutes == 60
-
-    hours + minutes
+  def self.at(hours, minutes= 0)
+    new(hours, minutes)
   end
 
   def ==(other_clock)
     @hours == other_clock.hours && @minutes == other_clock.minutes
   end
 
-  def +(number)
-    if number >= 1440
-      days = number / 1440
-      number -= (1440 * days)
-      num_one, num_two = number.divmod(60)
+  def +(integer)
+    if integer >= ONE_DAY
+      days = integer / ONE_DAY
+      integer -= (ONE_DAY * days)
+      hours, minutes = integer.divmod(60)
+      @hours += hours
+      @minutes += minutes
+    elsif integer >= 60
+      hours, minutes = integer.divmod(60)
+      @hours += hours
+      @minutes += minutes
+    else
+      @minutes += integer
     end
-
-    @hours += num_one
-    @minutes += num_two
-
-    Clock.at(@hours, @minutes)
+    self.class.new(@hours, @minutes)
   end
 
-  class << self
-    def military_time(hours)
-      return 0 if hours == 24
-      hours - 12
-    end
+  def to_s
+    format('%02d:%02d', hours, minutes)
   end
 end
-
-p Clock.at(10)
