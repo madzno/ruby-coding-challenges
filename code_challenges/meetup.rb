@@ -90,67 +90,109 @@ class Meetup
 
   MONTHS_WITH_THIRTY_DAYS = [4, 6, 9, 11]
   MONTHS_WITH_THIRTY_ONE_DAYS = [1, 3, 5, 7, 8, 10, 12]
+  TEENTH_DAYS = [13, 14, 15, 16, 17, 18, 19]
 
   def initialize(year, month)
     @year = year
     @month = month
   end
 
-  def day(day_of_the_week, descriptor)
-    day_of_the_week_flag = day_of_the_week.downcase.to_sym
+  def day(weekday, descriptor)
+    weekday_flag = weekday.downcase.to_sym
     descriptor_flag = descriptor.downcase.to_sym
-    days_in_month = find_max_days
+    max_days = find_days_in_month
 
-    if [:first, :second, :third, :fourth, :fifth, :last].include?(descriptor_flag)
-      day_of_meetup = case day_of_the_week_flag
-                      when :monday    then mondays(descriptor_flag, days_in_month)
-                      when :tuesday   then tuesdays(descriptor_flag, days_in_month)
-                      when :wednesday then wednesdays(descriptor_flag, days_in_month)
-                      when :thursday  then thursdays(descriptor_flag, days_in_month)
-                      when :friday    then fridays(descriptor_flag, days_in_month)
-                      when :saturday  then saturdays(descriptor, days_in_month)
-                      when :sunday    then sundays(descriptor, days_in_month)
-                      end
+    if descriptor_flag == :teenth
+      day_of_meetup = find_teenth_days(weekday_flag)
+    else
+      day_of_meetup = find_all_days(weekday_flag, descriptor_flag, max_days)
     end
-    day_of_meetup
+
+    return nil if day_of_meetup == nil
+    Date.new(year, month, day_of_meetup)
   end
 
-  def find_max_days
-    if MONTHS_WITH_THIRTY_DAYS.include?(month)
-      30
-    elsif MONTHS_WITH_THIRTY_ONE_DAYS.include?(month)
-      31
-    else
-      if Date.new(year).leap?
-        29
-      else
-        28
+  def find_days_in_month
+    case
+    when MONTHS_WITH_THIRTY_DAYS.include?(month)     then 30
+    when MONTHS_WITH_THIRTY_ONE_DAYS.include?(month) then 31
+    when month == 2 && Date.new(year).leap?          then 29
+    else 28
+    end
+  end
+
+  def find_all_days(day_of_the_week_flag, descriptor_flag, max_day)
+    days_arr = []
+    days_in_month = (1..max_day).to_a
+
+    day_of_the_week_num = case day_of_the_week_flag
+                          when :sunday    then 0
+                          when :monday    then 1
+                          when :tuesday   then 2
+                          when :wednesday then 3
+                          when :thursday  then 4
+                          when :friday    then 5
+                          when :saturday  then 6
+                          end
+
+    days_in_month.each do |current_day|
+      if Date.new(year, month, current_day).wday == day_of_the_week_num
+        days_arr << current_day
       end
     end
+
+    date = find_date(descriptor_flag, days_arr)
   end
 
-  def mondays(descriptor_flag, days_in_month)
-    mondays_arr = []
-
-    1.upto(days_in_month) do |current_day|
-      mondays_arr << current_day if Date.new(year, month, current_day).monday?
+  def find_date(descriptor_flag, array)
+    case descriptor_flag
+    when :first  then array.first
+    when :second then array[1]
+    when :third  then array[2]
+    when :fourth then array[3]
+    when :fifth  then array[4]
+    when :last   then array.last
     end
-
-    date = case descriptor_flag
-           when :first  then mondays_arr.first
-           when :second then mondays_arr[1]
-           when :third  then mondays_arr[2]
-           when :fourth then mondays_arr[3]
-           when :fifth  then mondays_arr[4]
-           when :last   then mondays_arr.last
-           end
-    date
   end
 
+  def find_teenth_days(day_of_the_week_flag)
+    teenth_day = case day_of_the_week_flag
+                 when :monday then
+                   TEENTH_DAYS.select do |teenth_day|
+                     Date.new(year, month, teenth_day).monday?
+                   end
+                 when :tuesday  then
+                   TEENTH_DAYS.select do |teenth_day|
+                     Date.new(year, month, teenth_day).tuesday?
+                   end
+                when :wednesday then
+                  TEENTH_DAYS.select do |teenth_day|
+                    Date.new(year, month, teenth_day).wednesday?
+                  end
+                when :thursday then
+                  TEENTH_DAYS.select do |teenth_day|
+                    Date.new(year, month, teenth_day).thursday?
+                  end
+                when :friday then
+                  TEENTH_DAYS.select do |teenth_day|
+                    Date.new(year, month, teenth_day).friday?
+                  end
+                when :saturday then
+                  TEENTH_DAYS.select do |teenth_day|
+                    Date.new(year, month, teenth_day).saturday?
+                  end
+                when :sunday then
+                  TEENTH_DAYS.select do |teenth_day|
+                    Date.new(year, month, teenth_day).sunday?
+                  end
+                end
+    teenth_day[0]
+  end
 end
 
-p Meetup.new(2016, 3).day("Monday", "last")
+meetup = Meetup.new(2013, 3)
+p meetup.day('Monday', 'first')
 
-# to do when back - build out the tuesdays,w ednesdays, ect methods
-# figure out how to return nil when there is no fifth
-# figure out 'teenth'
+
+# refactor day of the week num case statement
+# refactor find teenth days
