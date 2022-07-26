@@ -44,15 +44,42 @@ For first, add 1 to the day of the date object
 when Date.(year, month, day).monday? returns true, assign the day number
 to the local variable meet up date
 
-ALGO "FIRST"
+ALGO
 - define a method day that takes two string arguments day_of_the_week ("Monday"), descriptor("first")
+- assign a local variable 'day_of_the_week_flag' to the day_of_the_week downcased and converted to a symbol
+- assign a local variable 'descriptor_flag' to the descriptor downcased and converted to a symbol
+- figure the days in the current month
 
--if day_of_the_week is monday and descriptor is first,
-- initialize a local variable day_of_meetup to 0
-- From 1 up to 31, assign the number to the day of the date object Date.(@year, @month, day)
-- if Date.(@year, @month, current_day).day_of_the_week? returns true, add the current_day to
-day_of_meetup and break out of the loop
-- return the date object Date.(year, month, date_of_meetup)
+- days_in_month
+- MONTHS_WITH_THIRTY_DAYS = [4, 6, 9, 11]
+- MONTHS_WITH_THIRTY_ONE_DAYS = [1, 3, 5, 7, 8, 10, 12]
+- if MONTHS_WITH_THIRTY_DAYS.include?(@month) then days_in_month = 31
+- if MONTHS_WITH_THIRTY_DAYS.include?(@month) then days_in_month = 30
+- if @month == 2 then
+- if @year.leap? days_in_month = 29
+  else days_in_month = 28
+
+- assign a local variable date_of_meetup to the return value of a case statement about the day of the week
+- when :monday then mondays(descritpor)
+- when :tuesday then tuesdays(descriptor)
+- when :wednesday then wednesdays(descriptor)
+- when :thursday then thursdays(descriptor)
+- when :friday then fridays(descriptor)
+- when :saturday then saturdays(descriptor)
+- when :sunday then sundays(descriptor)
+
+- for first, second, third, fourth, fifth, last
+- initialize a local variable mondays (or tuesdays, ect.) to an empty array
+- From 1 up to days_in_month, initialize a block parameter current_day and create a new date object (Date.new)
+with the year, month, and current_day
+- if Date.day_of_the_week? returns true, add the current_day to the Mondays (or tuesdays, ect.) Array
+- assign the local variable date to the return value of a case statement
+- when descriptor is :first then Mondays.first
+- when descriptor is :second then Mondays[1]
+- when descriptor is :third then Mondays[2]
+- when descriptor is :fourth then Mondays[3]
+- when descriptor is :fifth then Mondays[4] (may be nil)
+- when descriptor is :last then Mondays.last
 
 
 =end
@@ -61,27 +88,69 @@ require 'date'
 class Meetup
   attr_reader :year, :month
 
+  MONTHS_WITH_THIRTY_DAYS = [4, 6, 9, 11]
+  MONTHS_WITH_THIRTY_ONE_DAYS = [1, 3, 5, 7, 8, 10, 12]
+
   def initialize(year, month)
     @year = year
     @month = month
   end
 
   def day(day_of_the_week, descriptor)
-    first_monday
+    day_of_the_week_flag = day_of_the_week.downcase.to_sym
+    descriptor_flag = descriptor.downcase.to_sym
+    days_in_month = find_max_days
+
+    if [:first, :second, :third, :fourth, :fifth, :last].include?(descriptor_flag)
+      day_of_meetup = case day_of_the_week_flag
+                      when :monday    then mondays(descriptor_flag, days_in_month)
+                      when :tuesday   then tuesdays(descriptor_flag, days_in_month)
+                      when :wednesday then wednesdays(descriptor_flag, days_in_month)
+                      when :thursday  then thursdays(descriptor_flag, days_in_month)
+                      when :friday    then fridays(descriptor_flag, days_in_month)
+                      when :saturday  then saturdays(descriptor, days_in_month)
+                      when :sunday    then sundays(descriptor, days_in_month)
+                      end
+    end
+    day_of_meetup
   end
 
-  def first_monday
-    date = 0
-
-    1.upto(31) do |current_day|
-      if Date.new(year, month, current_day).monday?
-        date += current_day
+  def find_max_days
+    if MONTHS_WITH_THIRTY_DAYS.include?(month)
+      30
+    elsif MONTHS_WITH_THIRTY_ONE_DAYS.include?(month)
+      31
+    else
+      if Date.new(year).leap?
+        29
+      else
+        28
       end
     end
+  end
 
+  def mondays(descriptor_flag, days_in_month)
+    mondays_arr = []
+
+    1.upto(days_in_month) do |current_day|
+      mondays_arr << current_day if Date.new(year, month, current_day).monday?
+    end
+
+    date = case descriptor_flag
+           when :first  then mondays_arr.first
+           when :second then mondays_arr[1]
+           when :third  then mondays_arr[2]
+           when :fourth then mondays_arr[3]
+           when :fifth  then mondays_arr[4]
+           when :last   then mondays_arr.last
+           end
     date
   end
 
 end
 
+p Meetup.new(2016, 3).day("Monday", "last")
 
+# to do when back - build out the tuesdays,w ednesdays, ect methods
+# figure out how to return nil when there is no fifth
+# figure out 'teenth'
