@@ -92,8 +92,6 @@ to the Mondays (or tuesdays, ect.) Array
 require 'date'
 
 class Meetup
-  attr_reader :year, :month
-
   MONTHS_WITH_THIRTY_DAYS = [4, 6, 9, 11]
   MONTHS_WITH_THIRTY_ONE_DAYS = [1, 3, 5, 7, 8, 10, 12]
   TEENTH_DAYS = [13, 14, 15, 16, 17, 18, 19]
@@ -117,6 +115,10 @@ class Meetup
     return nil if day_of_meetup.nil?
     Date.new(year, month, day_of_meetup)
   end
+
+  private
+
+  attr_reader :month, :year
 
   def find_days_in_month
     if MONTHS_WITH_THIRTY_DAYS.include?(month)
@@ -145,7 +147,7 @@ class Meetup
     find_date(descriptor_flag, days_arr)
   end
 
-  def find_day_flag(day_of_the_week_flag)
+  def find_day_flag(day_of_the_week_flag) # rubocop:disable Metrics/CyclomaticComplexity
     case day_of_the_week_flag
     when :sunday    then 0
     when :monday    then 1
@@ -171,11 +173,8 @@ class Meetup
   def find_teenth_days(day_of_the_week_flag)
     day_of_the_week_num = find_day_flag(day_of_the_week_flag)
 
-    teenth_day_arr = TEENTH_DAYS.select do |teenth_day|
-                       Date.new(year, month, teenth_day).wday ==
-                         day_of_the_week_num
-                     end
-
-    teenth_day_arr[0]
+    TEENTH_DAYS.select do |teenth_day|
+      Date.new(year, month, teenth_day).wday == day_of_the_week_num
+    end.[](0)
   end
 end
