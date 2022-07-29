@@ -1,22 +1,3 @@
-=begin
-
-Instance method reverse
-- [1, 2]
-- [Element @datum = 1, @next = element2, Element @datum = 2, @next = nil]
-- reverse
-- [Element @datum = 2, @next = element1, Element @datum = 1, @next = nil]
-
-- Step 1 = reverse linked list array
-[Element @datum = 2, @next = nil, Element @datum = 1, @next = element2]
-
-- Step 2 iterate through the linked list by index
-- if its the last element in the linked list set @next to nil
-- otherwise,
-reasign next to the element at index + 1
-
-
-=end
-
 class Element
   attr_reader :datum
   attr_accessor :next
@@ -27,7 +8,7 @@ class Element
   end
 
   def tail?
-    return true if @next == nil
+    return true if @next.nil?
     false
   end
 end
@@ -94,13 +75,13 @@ class SimpleLinkedList
   end
 
   def reverse
-    reversed_array = @linked_list.reverse
-    reversed_array.each_with_index do |el, idx|
-      if @linked_list.last == el
-        el.next = nil
-      else
-        el.next = @linked_list[idx + 1]
-      end
+    @linked_list.reverse!.each_with_index do |el, idx|
+      el.next = if @linked_list.last == el
+                  nil
+                else
+                  @linked_list[idx + 1]
+                end
     end
+    self
   end
 end
