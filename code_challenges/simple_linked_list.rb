@@ -8,8 +8,7 @@ class Element
   end
 
   def tail?
-    return true if @next.nil?
-    false
+    @next.nil?
   end
 end
 
@@ -25,8 +24,7 @@ class SimpleLinkedList
   end
 
   def empty?
-    return true if @linked_list.empty?
-    false
+    @linked_list.empty?
   end
 
   def push(num)
