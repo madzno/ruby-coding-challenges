@@ -8,6 +8,10 @@ class TestText < MiniTest::Test
     yield(@file.read)
   end
 
+  def swap
+    text = Text.new(@file)
+  end
+
   # def teardown
   #   @file.close
   # end
